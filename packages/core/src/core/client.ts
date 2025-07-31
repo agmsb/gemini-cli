@@ -162,7 +162,14 @@ export class GeminiClient {
 
   async setTools(): Promise<void> {
     const toolRegistry = await this.config.getToolRegistry();
-    const toolDeclarations = toolRegistry.getFunctionDeclarations();
+    const excludeTools = this.config.getExcludeTools() || [];
+    const toolDeclarations = toolRegistry
+      .getFunctionDeclarations()
+      .filter(
+        (tool) =>
+          !excludeTools.includes(tool.name) &&
+          !excludeTools.includes(toolRegistry.getTool(tool.name)?.constructor.name || ''),
+      );
     const tools: Tool[] = [{ functionDeclarations: toolDeclarations }];
     this.getChat().setTools(tools);
   }
@@ -258,7 +265,14 @@ export class GeminiClient {
   async startChat(extraHistory?: Content[]): Promise<GeminiChat> {
     const envParts = await this.getEnvironment();
     const toolRegistry = await this.config.getToolRegistry();
-    const toolDeclarations = toolRegistry.getFunctionDeclarations();
+    const excludeTools = this.config.getExcludeTools() || [];
+    const toolDeclarations = toolRegistry
+      .getFunctionDeclarations()
+      .filter(
+        (tool) =>
+          !excludeTools.includes(tool.name) &&
+          !excludeTools.includes(toolRegistry.getTool(tool.name)?.constructor.name || ''),
+      );
     const tools: Tool[] = [{ functionDeclarations: toolDeclarations }];
     const history: Content[] = [
       {
